@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>JobPilot | 求人応募管理</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="JobPilot ホーム">
+        <span class="brand-mark" aria-hidden="true">J</span>
+        <span>JobPilot</span>
+      </a>
+      <p class="header-note">応募状況を、ひと目で管理。</p>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">MY JOB SEARCH</p>
+      <h1 id="page-title">求人応募管理</h1>
+      <p>気になる求人と応募の進み具合をまとめて記録しましょう。</p>
+    </section>
+
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+
+    <section class="panel form-panel" aria-labelledby="form-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">JOB DETAILS</p>
+          <h2 id="form-title">求人を登録する</h2>
+        </div>
+        <span class="heading-icon" aria-hidden="true">＋</span>
+      </div>
+
+      <form id="job-form">
+        <div class="form-grid">
+          <label class="field">
+            <span>会社名 <span class="required">必須</span></span>
+            <input id="company" name="company" type="text" placeholder="例：株式会社サンプル" maxlength="100" required>
+          </label>
+          <label class="field">
+            <span>職種 <span class="required">必須</span></span>
+            <input id="role" name="role" type="text" placeholder="例：Webデザイナー" maxlength="100" required>
+          </label>
+          <label class="field">
+            <span>勤務地</span>
+            <input id="location" name="location" type="text" placeholder="例：東京都渋谷区" maxlength="100">
+          </label>
+          <label class="field">
+            <span>時給（<span id="wage-code">JPY</span>） <span class="required">必須</span></span>
+            <div class="input-suffix">
+              <input id="hourly-wage" name="hourlyWage" type="number" placeholder="1,500" min="0" step="1" required>
+              <span id="wage-currency-symbol" aria-hidden="true">￥</span>
+            </div>
+          </label>
+          <label class="field field-status">
+            <span>応募状況</span>
+            <select id="status" name="status">
+              <option value="未応募">未応募</option>
+              <option value="応募済み">応募済み</option>
+              <option value="返信待ち">返信待ち</option>
+              <option value="採用">採用</option>
+              <option value="不採用">不採用</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button id="cancel-edit" class="button button-secondary" type="button" hidden>編集をキャンセル</button>
+          <button id="submit-button" class="button button-primary" type="submit">
+            <span aria-hidden="true">＋</span> 求人を登録
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="jobs-section" aria-labelledby="jobs-title">
+      <div class="list-heading">
+        <div>
+          <p class="eyebrow">YOUR OPPORTUNITIES</p>
+          <h2 id="jobs-title">登録した求人 <span id="job-count" class="count">0件</span></h2>
+        </div>
+      </div>
+      <div class="list-controls" aria-label="求人一覧の検索と絞り込み">
+        <label class="field control-search">
+          <span>会社名・職種で検索</span>
+          <input id="search" type="search" placeholder="会社名や職種を入力" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>応募状況で絞り込み</span>
+          <select id="status-filter">
+            <option value="">すべての状況</option>
+            <option value="未応募">未応募</option>
+            <option value="応募済み">応募済み</option>
+            <option value="返信待ち">返信待ち</option>
+            <option value="採用">採用</option>
+            <option value="不採用">不採用</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>時給の並び替え</span>
+          <select id="sort-order">
+            <option value="newest">登録順</option>
+            <option value="high-to-low">時給が高い順</option>
+            <option value="low-to-high">時給が低い順</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>表示通貨（換算なし）</span>
+          <select id="currency">
+            <option value="JPY">日本円 (JPY)</option>
+            <option value="USD">米ドル (USD)</option>
+            <option value="EUR">ユーロ (EUR)</option>
+            <option value="GBP">英ポンド (GBP)</option>
+            <option value="AUD">豪ドル (AUD)</option>
+            <option value="NZD">ニュージーランドドル (NZD)</option>
+          </select>
+        </label>
+      </div>
+      <div id="job-list" class="job-list"></div>
+      <div id="empty-state" class="empty-state">
+        <span class="empty-icon" aria-hidden="true">✳</span>
+        <h3 id="empty-title">求人はまだありません</h3>
+        <p id="empty-description">上のフォームから、最初の求人を登録してみましょう。</p>
+      </div>
+    </section>
+    <p class="privacy-note"><span aria-hidden="true">🔒</span> 登録したデータはこのブラウザ内に保存されます。</p>
+  </main>
+
+  <footer class="site-footer">
+    <p>JobPilot <span aria-hidden="true">·</span> あなたの仕事探しをサポート</p>
+  </footer>
+</body>
+</html>
