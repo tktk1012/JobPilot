@@ -105,6 +105,89 @@ body {
   box-shadow: 0 5px 20px rgb(32 45 75 / 3%);
 }
 
+.analysis-panel {
+  margin-bottom: 22px;
+}
+
+.analysis-notice {
+  margin: -7px 0 18px;
+  color: #68758a;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.analysis-input textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 12px;
+  resize: vertical;
+  border: 1px solid #e3e8f0;
+  border-radius: 8px;
+  outline: none;
+  color: #283448;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.7;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.analysis-input textarea::placeholder {
+  color: #b0b8c5;
+}
+
+.analysis-input textarea:focus {
+  border-color: #7184e2;
+  box-shadow: 0 0 0 3px rgb(80 105 216 / 11%);
+}
+
+.analysis-results {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.analysis-results h3 {
+  margin: 0 0 12px;
+  color: #273349;
+  font-size: 14px;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.analysis-grid > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.analysis-grid dt {
+  color: #788396;
+  font-size: 11px;
+}
+
+.analysis-grid dd {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+  color: #283448;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.analysis-footnote {
+  margin: 12px 0 0;
+  color: #788396;
+  font-size: 11px;
+}
+
 .section-heading,
 .list-heading {
   display: flex;
@@ -495,6 +578,10 @@ body {
   .form-grid {
     grid-template-columns: 1fr;
     gap: 15px;
+  }
+
+  .analysis-grid {
+    grid-template-columns: 1fr;
   }
 
   .list-controls {

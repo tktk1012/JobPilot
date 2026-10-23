@@ -26,10 +26,118 @@ const searchInput = document.querySelector("#search");
 const statusFilter = document.querySelector("#status-filter");
 const sortOrder = document.querySelector("#sort-order");
 const currencyInput = document.querySelector("#currency");
+const jobDescriptionInput = document.querySelector("#job-description");
+const analyzeJobButton = document.querySelector("#analyze-job");
+const analysisResults = document.querySelector("#analysis-results");
+const analysisWage = document.querySelector("#analysis-wage");
+const analysisHours = document.querySelector("#analysis-hours");
+const analysisLodging = document.querySelector("#analysis-lodging");
+const analysisLocation = document.querySelector("#analysis-location");
+const analysisWeeklyPay = document.querySelector("#analysis-weekly-pay");
+const analysisAfterLodging = document.querySelector("#analysis-after-lodging");
 
 let jobs = [];
 let editingJobId = null;
 let displayCurrency = "JPY";
+
+function normalizeAnalysisText(text) {
+  return text
+    .replace(/[０-９]/g, (character) => String.fromCharCode(character.charCodeAt(0) - 0xfee0))
+    .replace(/[，]/g, ",")
+    .replace(/[．]/g, ".");
+}
+
+function extractAmount(text, patterns) {
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const amount = Number(match[1].replace(/,/g, ""));
+      if (Number.isFinite(amount)) {
+        return amount;
+      }
+    }
+  }
+  return null;
+}
+
+function extractJobAnalysis(description) {
+  const text = normalizeAnalysisText(description);
+  const hourlyWage = extractAmount(text, [
+    /(?:時給|時間給|1時間あたり)\s*(?:は|：|:|約)?\s*[¥￥]?\s*([\d,]+)\s*円?/i,
+    /([\d,]+)\s*円\s*(?:\/|／| per )\s*(?:時|時間)/i,
+    /(?:Pay|Hourly\s+rate|Wage)\s*[:：]?\s*(?:NZ\$|NZD\s*)\s*([\d,]+)\s*\/\s*(?:hour|hr)\b/i,
+    /(?:NZ\$|NZD\s*)\s*([\d,]+)\s*\/\s*(?:hour|hr)\b/i
+  ]);
+  let weeklyHours = null;
+  const weeklyHoursMatch = text.match(/週(?:あたり|間|に)?\s*([\d.]+)\s*(?:時間|h\b)/i)
+    || text.match(/([\d.]+)\s*hours?\s*(?:per|a)\s*week\b/i);
+  if (weeklyHoursMatch) {
+    weeklyHours = Number(weeklyHoursMatch[1]);
+  } else {
+    const workDaysMatch = text.match(/週(?:に)?\s*(\d+)\s*日/i);
+    const dailyHoursMatch = text.match(/1日(?:あたり)?\s*([\d.]+)\s*時間/i);
+    if (workDaysMatch && dailyHoursMatch) {
+      weeklyHours = Number(workDaysMatch[1]) * Number(dailyHoursMatch[1]);
+    }
+  }
+  if (!Number.isFinite(weeklyHours) || weeklyHours <= 0) {
+    weeklyHours = null;
+  }
+
+  let lodgingCost = null;
+  let weeklyLodgingCost = null;
+  const lodgingMatch = text.match(/(?:宿泊費|宿泊料金|寮費|滞在費|Accommodation)([^\r\n]{0,35}?)([\d,]+)\s*(?:円|NZ\$|NZD)?/i);
+  if (lodgingMatch) {
+    lodgingCost = Number(lodgingMatch[2].replace(/,/g, ""));
+    const lodgingContext = text.slice(lodgingMatch.index, lodgingMatch.index + lodgingMatch[0].length + 24);
+    if (/(?:週あたり|週額|週|週間|\/週|／週|per\s+week|weekly)/i.test(lodgingContext)) {
+      weeklyLodgingCost = lodgingCost;
+    }
+  }
+  if (!Number.isFinite(lodgingCost) || lodgingCost < 0) {
+    lodgingCost = null;
+    weeklyLodgingCost = null;
+  }
+
+  const locationMatch = text.match(/(?:勤務地|Location)\s*(?:は|：|:)?\s*([^\r\n。;；]+)/i);
+  const location = locationMatch ? locationMatch[1].replace(/[、,]\s*$/, "").trim() : "";
+
+  return {
+    hourlyWage,
+    weeklyHours,
+    lodgingCost,
+    weeklyLodgingCost,
+    location,
+    currency: /(?:NZ\$|NZD)/i.test(text) ? "NZD" : "JPY"
+  };
+}
+
+function formatAnalysisCurrency(amount, currency) {
+  return new Intl.NumberFormat("ja-JP", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+function renderJobAnalysis() {
+  const result = extractJobAnalysis(jobDescriptionInput.value);
+  const weeklyPay = result.hourlyWage !== null && result.weeklyHours !== null
+    ? result.hourlyWage * result.weeklyHours
+    : null;
+
+  analysisWage.textContent = result.hourlyWage === null ? "不明" : `${formatAnalysisCurrency(result.hourlyWage, result.currency)} / 時`;
+  analysisHours.textContent = result.weeklyHours === null ? "不明" : `${result.weeklyHours}時間`;
+  analysisLodging.textContent = result.lodgingCost === null
+    ? "不明"
+    : `${formatAnalysisCurrency(result.lodgingCost, result.currency)}${result.weeklyLodgingCost === null ? "（期間不明）" : " / 週"}`;
+  analysisLocation.textContent = result.location || "不明";
+  analysisWeeklyPay.textContent = weeklyPay === null ? "不明" : formatAnalysisCurrency(weeklyPay, result.currency);
+  analysisAfterLodging.textContent = weeklyPay === null || result.weeklyLodgingCost === null
+    ? "不明"
+    : formatAnalysisCurrency(weeklyPay - result.weeklyLodgingCost, result.currency);
+  analysisResults.hidden = false;
+}
 
 function showMessage(text, type = "error") {
   message.textContent = text;
@@ -299,6 +407,8 @@ cancelEditButton.addEventListener("click", () => {
   resetForm();
   clearMessage();
 });
+
+analyzeJobButton.addEventListener("click", renderJobAnalysis);
 
 searchInput.addEventListener("input", renderJobs);
 statusFilter.addEventListener("change", renderJobs);

@@ -26,6 +26,36 @@
       <p>気になる求人と応募の進み具合をまとめて記録しましょう。</p>
     </section>
 
+    <section class="panel analysis-panel" aria-labelledby="analysis-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">JOB TEXT ANALYSIS</p>
+          <h2 id="analysis-title">求人AI分析（試作）</h2>
+        </div>
+        <span class="heading-icon" aria-hidden="true">✳</span>
+      </div>
+      <p class="analysis-notice">これはAIによる分析ではありません。外部APIは使わず、入力文をブラウザー内のルールベース処理で確認します。</p>
+      <label class="field analysis-input">
+        <span>求人情報の文章</span>
+        <textarea id="job-description" rows="7" placeholder="求人情報を貼り付けてください。例：時給1,500円、週20時間勤務、宿泊費は週8,000円、勤務地：東京都渋谷区"></textarea>
+      </label>
+      <div class="form-actions">
+        <button id="analyze-job" class="button button-primary" type="button">求人を分析</button>
+      </div>
+      <div id="analysis-results" class="analysis-results" aria-live="polite" hidden>
+        <h3>分析結果</h3>
+        <dl class="analysis-grid">
+          <div><dt>時給</dt><dd id="analysis-wage">不明</dd></div>
+          <div><dt>週の勤務時間</dt><dd id="analysis-hours">不明</dd></div>
+          <div><dt>宿泊費</dt><dd id="analysis-lodging">不明</dd></div>
+          <div><dt>勤務地</dt><dd id="analysis-location">不明</dd></div>
+          <div><dt>週収（税引前）</dt><dd id="analysis-weekly-pay">不明</dd></div>
+          <div><dt>宿泊費差引後（税引前）</dt><dd id="analysis-after-lodging">不明</dd></div>
+        </dl>
+        <p class="analysis-footnote">差引額の計算には、宿泊費が週額で記載されている必要があります。</p>
+      </div>
+    </section>
+
     <div id="message" class="message" role="status" aria-live="polite" hidden></div>
 
     <section class="panel form-panel" aria-labelledby="form-title">
